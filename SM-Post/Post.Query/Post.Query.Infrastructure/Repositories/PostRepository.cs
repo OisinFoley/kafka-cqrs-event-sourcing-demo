@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Post.Query.Domain.Entities;
 using Post.Query.Domain.Repositories;
 using Post.Query.Infrastructure.DataAccess;
@@ -33,6 +34,15 @@ namespace Post.Query.Infrastructure.Repositories
             _ = await context.SaveChangesAsync();
         }
 
+        public async Task<List<PostEntity>> ListByAuthorAsync(string author)
+        {
+            using DatabaseContext context = _contextFactory.CreateDbContext();
+            return await context.Posts.AsNoTracking()
+                    .Include(p => p.Comments).AsNoTracking()
+                    .Where(x => x.Author.Contains(author))
+                    .ToListAsync();
+        }
+
         public async Task<PostEntity> GetByIdAsync(Guid postId)
         {
             using DatabaseContext context = _contextFactory.CreateDbContext();
@@ -46,15 +56,6 @@ namespace Post.Query.Infrastructure.Repositories
             using DatabaseContext context = _contextFactory.CreateDbContext();
             return await context.Posts.AsNoTracking()
                     .Include(p => p.Comments).AsNoTracking()
-                    .ToListAsync();
-        }
-
-        public async Task<List<PostEntity>> ListByAuthorAsync(string author)
-        {
-            using DatabaseContext context = _contextFactory.CreateDbContext();
-            return await context.Posts.AsNoTracking()
-                    .Include(p => p.Comments).AsNoTracking()
-                    .Where(x => x.Author.Contains(author))
                     .ToListAsync();
         }
 
